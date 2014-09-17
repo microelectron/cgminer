@@ -260,6 +260,21 @@ static struct usb_epinfo ava2_epinfos[] = {
 static struct usb_intinfo ava2_ints[] = {
 	USB_EPS(0, ava2_epinfos)
 };
+
+static struct usb_epinfo ica1_epinfos0[] = {
+	{ LIBUSB_TRANSFER_TYPE_INTERRUPT,   16, EPI(0x82), 0, 0 }
+};
+
+static struct usb_epinfo ica1_epinfos1[] = {
+	{ LIBUSB_TRANSFER_TYPE_BULK,    64, EPI(0x81), 0, 0 }, 
+	{ LIBUSB_TRANSFER_TYPE_BULK,    64, EPO(0x01), 0, 0 }
+};
+
+static struct usb_intinfo nano_ints[] = {
+	USB_EPS(1, ica1_epinfos1),
+	USB_EPS(0, ica1_epinfos0)
+};
+
 #endif
 
 #ifdef USE_KLONDIKE
@@ -559,6 +574,16 @@ static struct usb_find_devices find_dev[] = {
 		.timeout = AVALON_TIMEOUT_MS,
 		.latency = LATENCY_UNUSED,
 		INTINFO(ava2_ints) },
+	{
+		.drv = DRIVER_avalon2,
+		.name = "AV2",
+		.ident = IDENT_AV2,
+		.idVendor = 0x29f1,
+		.idProduct = 0x33f1,
+		.config = 1,
+		.timeout = AVALON_TIMEOUT_MS,
+		.latency = LATENCY_UNUSED,
+		INTINFO(nano_ints) },
 #endif
 #ifdef USE_HASHFAST
 	{
@@ -609,6 +634,16 @@ static struct usb_find_devices find_dev[] = {
 		INTINFO(kli_ints) },
 #endif
 #ifdef USE_ICARUS
+	{
+		.drv = DRIVER_avalon2,
+		.name = "ICA",
+		.ident = IDENT_ICA,
+		.idVendor = 0x1FC9,
+		.idProduct = 0x0083,
+		.config = 1,
+		.timeout = ICARUS_TIMEOUT_MS,
+		.latency = LATENCY_UNUSED,
+		INTINFO(ica_ints) },
 	{
 		.drv = DRIVER_icarus,
 		.name = "ICA",
@@ -2276,11 +2311,13 @@ bool usb_init(struct cgpu_info *cgpu, struct libusb_device *dev, struct usb_find
 	struct usb_find_devices *found_use = NULL;
 	int uninitialised_var(ret);
 	int i;
-
+	applog(LOG_DEBUG,"usb_init() functions called");
 	for (i = 0; find_dev[i].drv != DRIVER_MAX; i++) {
 		if (find_dev[i].drv == found_match->drv &&
 		    find_dev[i].idVendor == found_match->idVendor &&
 		    find_dev[i].idProduct == found_match->idProduct) {
+			applog(LOG_DEBUG,".........................finded found_match usb device ..................");
+			applog(LOG_DEBUG,"drv = %d, idVendor= %x, idProduct= %x",found_match->drv,found_match->idVendor,found_match->idProduct);	
 			found_use = malloc(sizeof(*found_use));
 			if (unlikely(!found_use))
 				quit(1, "USB failed to malloc found_use");

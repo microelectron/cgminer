@@ -9060,7 +9060,7 @@ static void adjust_mostdevs(void)
 		most_devices = total_devices - zombie_devs;
 }
 
-#ifdef USE_ICARUS
+#ifdef USE_AVALON2
 bool icarus_get_device_id(struct cgpu_info *cgpu)
 {
 	static struct _cgpu_devid_counter *devids = NULL;

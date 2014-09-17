@@ -37,7 +37,7 @@
 #include "driver-avalon2.h"
 #include "crc.h"
 #include "sha2.h"
-
+unsigned char MM_VERSION[15] = "201408160000000";
 #define ASSERT1(condition) __maybe_unused static char sizeof_uint32_t_must_be_4[(condition)?1:-1]
 ASSERT1(sizeof(uint32_t) == 4);
 
@@ -659,17 +659,19 @@ static struct cgpu_info *avalon2_detect_one(struct libusb_device *dev, struct us
 	int err, amount;
 	int tmp, i, j, modular[AVA2_DEFAULT_MODULARS] = {};
 	char mm_version[AVA2_DEFAULT_MODULARS][16];
-
+	//debug code
+	unsigned char array[39];
 	struct cgpu_info *avalon2 = usb_alloc_cgpu(&avalon2_drv, 1);
 	struct avalon2_pkg detect_pkg;
 	struct avalon2_ret ret_pkg;
+	applog(LOG_WARNING,".................avalon2_detect_one() functions called.............................");
 
 	if (!usb_init(avalon2, dev, found)) {
 		applog(LOG_ERR, "Avalon2 failed usb_init");
 		avalon2 = usb_free_cgpu(avalon2);
 		return NULL;
 	}
-	avalon2_initialise(avalon2);
+	//avalon2_initialise(avalon2);
 
 	for (j = 0; j < 2; j++) {
 		for (i = 0; i < AVA2_DEFAULT_MODULARS; i++) {
@@ -686,6 +688,10 @@ static struct cgpu_info *avalon2_detect_one(struct libusb_device *dev, struct us
 				applog(LOG_DEBUG, "%s %d: Avalon2 failed usb_read with err %d amount %d",
 				       avalon2->drv->name, avalon2->device_id, err, amount);
 				continue;
+			}else{
+				memset(array,0,39);
+				memcpy(array,(char *)&ret_pkg,39);
+				applog(LOG_DEBUG,"ACKDETECT package = %s",array);
 			}
 			ackdetect = ret_pkg.type;
 			applog(LOG_DEBUG, "Avalon2 Detect ID[%d]: %d", i, ackdetect);
